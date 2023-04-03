@@ -13,16 +13,17 @@ pip install -r requirements.txt
 
 ### Добавление ключа
 
-- Секретный токен
+- BITLY токен
 
 1. Создайте файл .env рядом с main.py
-2. .env содержит данные без кавычек
+2. Прописать в файле переменную BYTLY_TOKEN со значением полученного токена на сайте [bitly](http://bit.ly)
+3. .env содержит данные без кавычек
 
 Для примера, если прочитать файл .env можно увидеть следующее:
 
 ```bash
 $ cat .env
-SECRET_KEY=v3.r.122857201.8f0cg543b36467ef22c8a234ae54290f700f836c.804fhh73cce5e8hgyr7n5c2397cgtracf570b7f2
+BYTLY_TOKEN=v3.r.122857201.8f0cg543b36467ef22c8a234ae54290f700f836c.804fhh73cce5e8hgyr7n5c2397cgtracf570b7f2
 ```
 
 #### Получение токена
@@ -33,7 +34,7 @@ SECRET_KEY=v3.r.122857201.8f0cg543b36467ef22c8a234ae54290f700f836c.804fhh73cce5e
 На сайте Bitly, GENERIC ACCESS TOKEN вы получите наподобие такого: 
 
 ```
-17c09e20ad155405123ac1977542fecf00231da7.
+17c09e20ad155405123ac1977542fecf00231da7
 ```
 
 ## Запуск

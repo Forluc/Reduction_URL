@@ -4,8 +4,16 @@ import requests
 import os
 from dotenv import load_dotenv
 
+load_dotenv()
+URL = "https://api-ssl.bitly.com/v4/bitlinks/"
+TOKEN = os.environ['BYTLY_TOKEN']
+HEADERS = {
+    'Authorization': f'Bearer {TOKEN}',
+    'Content-Type': 'application/json'
+}
 
-def get_shorten_link(long_link, url, headers):
+
+def get_shorten_link(long_link, url=URL, headers=HEADERS):
     payload = {
         'long_url': long_link
     }
@@ -14,43 +22,31 @@ def get_shorten_link(long_link, url, headers):
     return response.json()['link']
 
 
-def get_count_clicks(bitlink, headers):
+def get_count_clicks(bitlink, headers=HEADERS):
     payload = {
         'unit': 'day',
         'units': '-1'
     }
-    bitlink = urlsplit(bitlink)
-    link_clicks = f'https://api-ssl.bitly.com/v4/bitlinks/{bitlink.netloc + bitlink.path}/clicks/summary'
-    response = requests.get(link_clicks, params=payload, headers=headers)
+    url_bitlink_clicks = f'{bitlink}/clicks/summary'
+    response = requests.get(url_bitlink_clicks, params=payload, headers=headers)
     response.raise_for_status()
     return response.json()['total_clicks']
 
 
-def is_bitlink(url_user, base_url, headers):
-    url = urlsplit(url_user)
-    base_url = base_url + url.netloc + url.path
-    response = requests.get(base_url, headers=headers)
-    if response.ok:
-        return True
-    else:
-        return False
+def is_bitlink(url_netloc_and_path, headers=HEADERS):
+    response = requests.get(url_netloc_and_path, headers=headers)
+    return response.ok
 
 
-def main():
-    load_dotenv()
-    URL = "https://api-ssl.bitly.com/v4/bitlinks/"
-    TOKEN = os.environ['BYTLY_TOKEN']
-    HEADERS = {
-        'Authorization': f'Bearer {TOKEN}',
-        'Content-Type': 'application/json'
-    }
-
+def main(base_url=URL):
     url = input('Enter url: ')
-    if is_bitlink(url, URL, HEADERS):
-        print(get_count_clicks(url, HEADERS))
+    url_split = urlsplit(url)
+    url_netloc_and_path = f'{base_url}{url_split.netloc}{url_split.path}'
+    if is_bitlink(url_netloc_and_path):
+        print(get_count_clicks(url_netloc_and_path))
     else:
-        print('Bitlink', get_shorten_link(url, URL, HEADERS))
+        print('Bitlink', get_shorten_link(url))
 
 
 if __name__ == "__main__":
-    main()
+    main(URL)
