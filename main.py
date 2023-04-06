@@ -4,49 +4,54 @@ import requests
 import os
 from dotenv import load_dotenv
 
-load_dotenv()
-URL = "https://api-ssl.bitly.com/v4/bitlinks/"
-TOKEN = os.environ['BYTLY_TOKEN']
-HEADERS = {
-    'Authorization': f'Bearer {TOKEN}',
-    'Content-Type': 'application/json'
-}
 
-
-def get_shorten_link(long_link, url=URL, headers=HEADERS):
-    payload = {
-        'long_url': long_link
+def shorten_link(url, base_url, token):
+    headers = {
+        'Authorization': f'Bearer {token}'
     }
-    response = requests.post(url, headers=headers, json=payload)
+    payload = {
+        'long_url': url
+    }
+    response = requests.post(base_url, headers=headers, json=payload)
     response.raise_for_status()
     return response.json()['link']
 
 
-def get_count_clicks(bitlink, headers=HEADERS):
+def get_count_clicks(bitlink, token):
+    headers = {
+        'Authorization': f'Bearer {token}'
+    }
     payload = {
         'unit': 'day',
         'units': '-1'
     }
-    url_bitlink_clicks = f'{bitlink}/clicks/summary'
-    response = requests.get(url_bitlink_clicks, params=payload, headers=headers)
+    link_clicks_url = f'{bitlink}/clicks/summary'
+    response = requests.get(link_clicks_url, params=payload, headers=headers)
     response.raise_for_status()
     return response.json()['total_clicks']
 
 
-def is_bitlink(url_netloc_and_path, headers=HEADERS):
+def is_bitlink(url_netloc_and_path, token):
+    headers = {
+        'Authorization': f'Bearer {token}'
+    }
     response = requests.get(url_netloc_and_path, headers=headers)
     return response.ok
 
 
-def main(base_url=URL):
+def main():
+    load_dotenv()
+    base_url = "https://api-ssl.bitly.com/v4/bitlinks/"
+    token = os.environ['BYTLY_TOKEN']
+
     url = input('Enter url: ')
     url_split = urlsplit(url)
-    url_netloc_and_path = f'{base_url}{url_split.netloc}{url_split.path}'
-    if is_bitlink(url_netloc_and_path):
-        print(get_count_clicks(url_netloc_and_path))
+    base_url_with_search_url = f'{base_url}{url_split.netloc}{url_split.path}'
+    if is_bitlink(base_url_with_search_url, token):
+        print(get_count_clicks(base_url_with_search_url, token))
     else:
-        print('Bitlink', get_shorten_link(url))
+        print('Bitlink', shorten_link(url, base_url, token))
 
 
 if __name__ == "__main__":
-    main(URL)
+    main()
