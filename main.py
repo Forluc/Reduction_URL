@@ -5,19 +5,20 @@ import os
 from dotenv import load_dotenv
 
 
-def shorten_link(url, base_url, token):
+def shorten_link(url, token):
     headers = {
         'Authorization': f'Bearer {token}'
     }
     payload = {
         'long_url': url
     }
+    base_url = "https://api-ssl.bitly.com/v4/bitlinks/"
     response = requests.post(base_url, headers=headers, json=payload)
     response.raise_for_status()
     return response.json()['link']
 
 
-def get_count_clicks(bitlink, token):
+def get_count_clicks(url, token):
     headers = {
         'Authorization': f'Bearer {token}'
     }
@@ -25,32 +26,34 @@ def get_count_clicks(bitlink, token):
         'unit': 'day',
         'units': '-1'
     }
-    link_clicks_url = f'{bitlink}/clicks/summary'
-    response = requests.get(link_clicks_url, params=payload, headers=headers)
+    base_url = "https://api-ssl.bitly.com/v4/bitlinks/"
+    split_url = urlsplit(url)
+    bitlink = f'{base_url}{split_url.netloc}{split_url.path}/clicks/summary'
+    response = requests.get(bitlink, params=payload, headers=headers)
     response.raise_for_status()
     return response.json()['total_clicks']
 
 
-def is_bitlink(url_netloc_and_path, token):
+def is_bitlink(url, token):
     headers = {
         'Authorization': f'Bearer {token}'
     }
-    response = requests.get(url_netloc_and_path, headers=headers)
+    base_url = "https://api-ssl.bitly.com/v4/bitlinks/"
+    split_url = urlsplit(url)
+    bitlink = f'{base_url}{split_url.netloc}{split_url.path}'
+    response = requests.get(bitlink, headers=headers)
     return response.ok
 
 
 def main():
     load_dotenv()
-    base_url = "https://api-ssl.bitly.com/v4/bitlinks/"
     token = os.environ['BYTLY_TOKEN']
 
     url = input('Enter url: ')
-    url_split = urlsplit(url)
-    base_url_with_search_url = f'{base_url}{url_split.netloc}{url_split.path}'
-    if is_bitlink(base_url_with_search_url, token):
-        print(get_count_clicks(base_url_with_search_url, token))
+    if is_bitlink(url, token):
+        print(get_count_clicks(url, token))
     else:
-        print('Bitlink', shorten_link(url, base_url, token))
+        print('Bitlink', shorten_link(url, token))
 
 
 if __name__ == "__main__":
