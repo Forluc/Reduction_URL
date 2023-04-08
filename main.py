@@ -3,6 +3,7 @@ from urllib.parse import urlsplit
 import requests
 import os
 from dotenv import load_dotenv
+import argparse
 
 
 def shorten_link(url, token):
@@ -49,11 +50,15 @@ def main():
     load_dotenv()
     token = os.environ['BYTLY_TOKEN']
 
-    url = input('Enter url: ')
+    parser = argparse.ArgumentParser(description='Программа сокращает ссылки')
+    parser.add_argument('-u', '--url', help='Ваш адрес url("http(-s)://example.com")')
+    args = parser.parse_args()
+    url = args.url
+
     if is_bitlink(url, token):
-        print(get_count_clicks(url, token))
+        print('Количество переходов по ссылке битли:', get_count_clicks(url, token))
     else:
-        print('Bitlink', shorten_link(url, token))
+        print('Bitlink:', shorten_link(url, token))
 
 
 if __name__ == "__main__":
